@@ -12,21 +12,38 @@ interface SlackMember {
   };
 }
 
-function addSlackID(slackers: User[], members: SlackMember[]) {
-  slackers.forEach((sl) => {
-    const slackMember = members.find((m) => {
-      return (m.profile.first_name === sl.first_name &&
-        m.profile.last_name === sl.last_name) ||
-        m.profile.last_name === sl.last_name ||
-        m.profile?.real_name_normalized?.toLowerCase() ===
-          `${sl.first_name} ${sl.last_name}`.toLowerCase();
-    });
+export interface ApiResults {
+  [index: string]: {
+    users: User[];
+  };
+}
 
-    sl.slackID = slackMember?.id;
+function addSlackID(apiResults: ApiResults, members: SlackMember[]) {
+  const dateKeys = Object.keys(apiResults);
+
+  dateKeys.forEach((k) => {
+    const lookup = apiResults[k];
+
+    const results = [
+      ...lookup.users.map((user) => {
+        const slackMember = members.find((m) => {
+          return (m.profile.first_name === user.first_name &&
+            m.profile.last_name === user.last_name) ||
+            m.profile.last_name === user.last_name ||
+            m.profile?.real_name_normalized?.toLowerCase() ===
+              `${user.first_name} ${user.last_name}`.toLowerCase();
+        });
+        user.slackID = slackMember?.id;
+
+        return user;
+      }),
+    ];
+
+    lookup.users = results;
   });
 }
 
-async function fetchData(url: URL, token: string): Promise<User[]> {
+async function fetchData(url: URL, token: string): Promise<ApiResults> {
   const options = {
     method: "GET",
     headers: {
@@ -39,7 +56,11 @@ async function fetchData(url: URL, token: string): Promise<User[]> {
   const response = await fetch(dataRequest);
   const json = await response.json();
 
-  return json.users.filter((user: User) => user.needsReminding);
+  if (response.status !== 200) {
+    throw new Error(json.message);
+  }
+
+  return json.dates;
 }
 
 // deno-lint-ignore no-explicit-any
@@ -59,14 +80,16 @@ export async function fetchUsers(
   apiUrl: string,
   apiToken: string,
   startDate: string,
+  endDate: string,
 ) {
   const url = new URL(apiUrl);
-  url.searchParams.set("date", startDate);
+  url.searchParams.set("start_date", startDate);
+  url.searchParams.set("end_date", endDate);
 
-  const users = await fetchData(url, apiToken);
+  const datesObject = await fetchData(url, apiToken);
   const slackUsers = await slackMembers(client);
 
-  addSlackID(users, slackUsers);
+  addSlackID(datesObject, slackUsers);
 
-  return users;
+  return datesObject;
 }

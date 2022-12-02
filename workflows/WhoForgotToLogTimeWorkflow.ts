@@ -1,5 +1,6 @@
 import { DefineWorkflow, Schema } from "deno-slack-sdk/mod.ts";
 import { FetchAndSendDataFunction } from "../functions/fetch_and_send_data/definition.ts";
+import { format } from "datetime";
 
 export const WhoForgotToLogTimeWorkflow = DefineWorkflow({
   callback_id: "check_slacker",
@@ -33,8 +34,15 @@ const formData = WhoForgotToLogTimeWorkflow.addStep(
         },
         {
           name: "start_date",
-          title: "Start Date",
+          title: "Start date",
           type: "slack#/types/date",
+          default: format(new Date(), "yyyy-MM-dd"),
+        },
+        {
+          name: "end_date",
+          title: "End date",
+          type: "slack#/types/date",
+          default: format(new Date(), "yyyy-MM-dd"),
         },
       ],
     },
@@ -45,4 +53,5 @@ WhoForgotToLogTimeWorkflow.addStep(FetchAndSendDataFunction, {
   interactivity: formData.outputs.interactivity,
   recipient: formData.outputs.fields.recipient,
   start_date: formData.outputs.fields.start_date,
+  end_date: formData.outputs.fields.end_date,
 });
