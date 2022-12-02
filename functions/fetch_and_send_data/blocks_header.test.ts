@@ -4,15 +4,19 @@ import blocksHeader from "./blocks_header.ts";
 Deno.test("blocksHeader generates valid blocks for date", () => {
   const expectedBlocks = [
     {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text:
-          "The following people were booked in to be working and haven’t logged any time.\n\n *Check date: DATE*",
-      },
+      elements: [
+        {
+          text:
+            "The following people were booked in to be working and haven’t logged any time.",
+          type: "mrkdwn",
+        },
+      ],
+      type: "context",
     },
-    { type: "divider" },
+    {
+      type: "divider",
+    },
   ];
 
-  assertEquals(blocksHeader("DATE"), expectedBlocks);
+  assertEquals(blocksHeader(), expectedBlocks);
 });

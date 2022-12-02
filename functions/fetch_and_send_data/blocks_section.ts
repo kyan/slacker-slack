@@ -3,9 +3,15 @@ import { NOTIFY_ID } from "./constants.ts";
 import { ApiResults } from "../users.ts";
 import { parse } from "datetime";
 
-function dateBlocks(date: string, users: User[]) {
+function dateBlocks(dateString: string, users: User[]) {
+  const dateFormatted = parse(dateString, "yyyy-MM-dd").toDateString();
   const userBlocks = users.map(
     (user: User) => {
+      const data = {
+        dateString,
+        slack_id: user.slackID,
+        first_name: user.first_name,
+      };
       const accessory = {
         accessory: {
           type: "button",
@@ -14,13 +20,13 @@ function dateBlocks(date: string, users: User[]) {
             text: `Notify ${user.first_name}!`,
           },
           action_id: NOTIFY_ID,
-          value: `${user.slackID}@${user.first_name}`,
+          value: JSON.stringify(data),
         },
       };
 
       return {
         block_id: `user_${
-          date.replace(" ", "").toLowerCase()
+          dateFormatted.replace(" ", "").toLowerCase()
         }_block_${user.slackID}`,
         type: "section",
         text: {
@@ -37,7 +43,7 @@ function dateBlocks(date: string, users: User[]) {
       "type": "context",
       "elements": [
         {
-          "text": `*${date}*`,
+          "text": `*${dateFormatted}*`,
           "type": "mrkdwn",
         },
       ],
@@ -58,9 +64,8 @@ export default function blocksSection(
 ): any[] {
   const dateKeys = Object.keys(apiData);
 
-  return dateKeys.sort().map((k) => {
-    const dateFormatted = parse(k, "yyyy-MM-dd").toDateString();
-    const blocks = dateBlocks(dateFormatted, apiData[k].users);
+  return dateKeys.sort().map((dateStr) => {
+    const blocks = dateBlocks(dateStr, apiData[dateStr].users);
     return blocks;
   });
 }

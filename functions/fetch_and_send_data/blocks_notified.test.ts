@@ -7,10 +7,10 @@ Deno.test("blocksNotified generates valid blocks for date", () => {
       type: "context",
       elements: [{
         type: "mrkdwn",
-        text: "*Message sent, <@UABC123> has been notified!*",
+        text: "*Message sent, <@UABC123> has been notified about date!*",
       }],
     },
   ];
 
-  assertEquals(blocksNotified("UABC123"), expectedBlocks);
+  assertEquals(blocksNotified("UABC123", "date"), expectedBlocks);
 });

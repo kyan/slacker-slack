@@ -8,7 +8,9 @@ export default Manifest({
   icon: "assets/icon.png",
   workflows: [WhoForgotToLogTimeWorkflow],
   functions: [FetchAndSendDataFunction],
-  outgoingDomains: ["kyan-slacker.deno.dev"],
+  outgoingDomains: [
+    "kyan-slacker.deno.dev",
+  ],
   botScopes: [
     "commands",
     "chat:write",

@@ -44,6 +44,7 @@ Deno.test("FetchAndSendDataFunction runs successfully", async () => {
   const inputs = {
     recipient: "U22222",
     start_date: "2022-03-01",
+    end_date: "2022-03-01",
     interactivity: {
       interactivity_pointer: "111.222.b79....",
       interactor: {
@@ -65,5 +66,8 @@ Deno.test("FetchAndSendDataFunction runs successfully", async () => {
     API_TOKEN: "abc123",
   };
   const result = await handler(createContext({ inputs, env }));
-  assertEquals(result, { completed: false });
+  assertEquals(result, {
+    completed: true,
+    error: "Cannot convert undefined or null to object",
+  });
 });

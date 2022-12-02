@@ -1,5 +1,6 @@
 export default function blocksNotified(
   slackID: string,
+  date: string,
   // deno-lint-ignore no-explicit-any
 ): any[] {
   return [
@@ -8,7 +9,8 @@ export default function blocksNotified(
       elements: [
         {
           type: "mrkdwn",
-          text: `*Message sent, <@${slackID}> has been notified!*`,
+          text:
+            `*Message sent, <@${slackID}> has been notified about ${date}!*`,
         },
       ],
     },

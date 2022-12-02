@@ -78,12 +78,7 @@ export default SlackFunction(
         );
       }
     } catch (e) {
-      await client.chat.postMessage({
-        channel: inputs.recipient,
-        text: `:scream: Oh dear! Something's gone wrong! ${e.message}`,
-      });
-
-      return { completed: true };
+      return { completed: true, error: e.message };
     }
 
     return {
