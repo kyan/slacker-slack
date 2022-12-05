@@ -15,13 +15,18 @@ export const FetchAndSendDataFunction = DefineFunction({
       },
       start_date: {
         type: "slack#/types/date",
-        description: "Date to check",
+        description: "Start date",
+      },
+      end_date: {
+        type: "slack#/types/date",
+        description: "End date",
       },
     },
     required: [
       "recipient",
-      "start_date",
       "interactivity",
+      "start_date",
+      "end_date",
     ],
   },
   output_parameters: {

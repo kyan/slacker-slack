@@ -4,7 +4,7 @@ import { SlackAPI } from "deno-slack-api/mod.ts";
 import { SlackFunction } from "deno-slack-sdk/mod.ts";
 import BlockActionHandler from "./block_actions.ts";
 import blocksHeader from "./blocks_header.ts";
-import blocksUsers from "./blocks_users.ts";
+import blocksSection from "./blocks_section.ts";
 import { NOTIFY_ID } from "./constants.ts";
 import { fetchUsers } from "../users.ts";
 
@@ -47,26 +47,38 @@ export default SlackFunction(
 
     const startDateFormatted = parse(inputs.start_date, "yyyy-MM-dd")
       .toDateString();
+    const endDateFormatted = parse(inputs.end_date, "yyyy-MM-dd")
+      .toDateString();
     const apiUrl = env.API_URL;
     const apiToken = env.API_TOKEN;
     const client = SlackAPI(token, {});
-    const users = await fetchUsers(client, apiUrl, apiToken, inputs.start_date);
-    const blocks = blocksHeader(startDateFormatted).concat([
-      ...blocksUsers(users),
-      {
-        type: "divider",
-      },
-    ]);
 
-    const msgResponse = await client.chat.postMessage({
-      channel: inputs.recipient,
-      blocks,
-      text:
-        `A new timesheet check has been generated for ${startDateFormatted}`,
-    });
+    try {
+      const apiData = await fetchUsers(
+        client,
+        apiUrl,
+        apiToken,
+        inputs.start_date,
+        inputs.end_date,
+      );
+      const blocks = blocksHeader()
+        .concat(...blocksSection(apiData));
 
-    if (!msgResponse.ok) {
-      console.log("Error during request chat.postMessage!", msgResponse.error);
+      const msgResponse = await client.chat.postMessage({
+        channel: inputs.recipient,
+        blocks,
+        text:
+          `A new timesheet check has been generated between *${startDateFormatted}* and *${endDateFormatted}*`,
+      });
+
+      if (!msgResponse.ok) {
+        console.log(
+          "Error during request chat.postMessage!",
+          msgResponse.error,
+        );
+      }
+    } catch (e) {
+      return { completed: true, error: e.message };
     }
 
     return {

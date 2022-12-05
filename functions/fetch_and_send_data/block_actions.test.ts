@@ -33,7 +33,8 @@ Deno.test("FetchAndSendDataFunction runs successfully", async () => {
 
   const context = {
     action: {
-      value: "U11111@Duncan",
+      value:
+        '{"dateString":"2022-12-02","slack_id":"UABC123","first_name":"Duncan"}',
       block_id: "no-used",
       action_id: NOTIFY_ID,
       style: "primary",
